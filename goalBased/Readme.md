@@ -1,6 +1,3 @@
-Sure! Here's the entire `README.md` content in one go:
-
-````markdown
 # Goal-Based Job Application Assistant
 
 This project demonstrates a **goal-based conversational AI assistant** that collects a user's **name, email, and skills** through natural conversation. The system is designed with strict state control to avoid repetition, hallucination, or infinite questioning.

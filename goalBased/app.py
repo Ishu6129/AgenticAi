@@ -1,22 +1,31 @@
-from dotenv import load_dotenv
+import streamlit as st
 from langchain_google_genai import GoogleGenerativeAI
 from langchain.agents import initialize_agent, Tool, AgentType
 from langchain.memory import ConversationBufferMemory
-import streamlit as st
-import os
 import re
-import fitz  # PyMuPDF
 
-# Initialize llm model
-load_dotenv()
-llm = GoogleGenerativeAI(
-    model="gemini-2.5-flash",
-    google_api_key=os.environ["GOOGLE_API_KEY"]
-)
+# Streamlit config
+st.set_page_config(page_title="🎯 Job Application Assistant", layout="centered")
 
+# API key handling
+if "GOOGLE_API_KEY" not in st.session_state:
+    st.session_state.GOOGLE_API_KEY = None
 
-st.set_page_config(page_title="🎯 Job Application Agent", layout="centered")
+@st.dialog("🔐 Enter Gemini API Key")
+def api_key_dialog():
+    key = st.text_input("Gemini API Key", type="password")
+    if st.button("Save Key"):
+        if key.strip():
+            st.session_state.GOOGLE_API_KEY = key.strip()
+            st.rerun()
+        else:
+            st.error("API key cannot be empty")
 
+if not st.session_state.GOOGLE_API_KEY:
+    api_key_dialog()
+    st.stop()
+
+# Session state for application data
 if "application_info" not in st.session_state:
     st.session_state.application_info = {
         "name": None,
@@ -24,75 +33,71 @@ if "application_info" not in st.session_state:
         "skills": None
     }
 
+# Chat history for UI
+if "chat_ui" not in st.session_state:
+    st.session_state.chat_ui = []
+
+# LangChain memory
 if "memory" not in st.session_state:
     st.session_state.memory = ConversationBufferMemory(
         memory_key="chat_history",
         return_messages=True
     )
 
-if "chat_ui" not in st.session_state:
-    st.session_state.chat_ui = []
+# LLM initialization
+llm = GoogleGenerativeAI(
+    model="gemini-2.5-flash-lite",
+    google_api_key=st.session_state.GOOGLE_API_KEY
+)
 
+# Tool to extract information
 def extract_application_info(text: str) -> str:
     info = st.session_state.application_info
-    name = re.search(
-        r"(?:my name is|i am)\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)",
-        text, re.I
-    )
-    email = re.search(r"\b[\w\.-]+@[\w\.-]+\.\w+\b", text)
-    skills = re.search(
-        r"(?:skills are|i know|i can use)\s+(.+)",
-        text, re.I
-    )
-    if name:
-        info["name"] = name.group(1).title()
-    if email:
-        info["email"] = email.group(0)
-    if skills:
-        info["skills"] = skills.group(1).strip()
-    return "Information extracted."
 
-def check_application_goal(_: str) -> str:
-    info = st.session_state.application_info
-    missing = [k for k, v in info.items() if not v]
-
-    if not missing:
-        return (
-            f"✅ Application complete!\n"
-            f"Name: {info['name']}\n"
-            f"Email: {info['email']}\n"
-            f"Skills: {info['skills']}"
+    if info["name"] is None:
+        name_match = re.search(
+            r"(?:my name is|i am|name is)\s+([A-Za-z ]+?)(?:[.,]|$)",
+            text,
+            re.IGNORECASE
         )
+        if name_match:
+            info["name"] = name_match.group(1).strip().title()
 
-    return f"⏳ Missing: {', '.join(missing)}. Ask user for this."
+    if info["email"] is None:
+        email_match = re.search(r"\b[\w.-]+@[\w.-]+\.\w+\b", text)
+        if email_match:
+            info["email"] = email_match.group(0)
+
+    if info["skills"] is None:
+        skills_match = re.search(
+            r"(?:skills are|i know|i can use|skills include)\s+(.+)",
+            text,
+            re.IGNORECASE
+        )
+        if skills_match:
+            info["skills"] = skills_match.group(1).strip()
+
+    return "Information processed."
 
 
-# Creating tools
+# Register tools
 tools = [
     Tool(
         name="extract_application_info",
         func=extract_application_info,
-        description="Extract name, email, and skills from user message or resume text"
-    ),
-    Tool(
-        name="check_application_goal",
-        func=check_application_goal,
-        description="Check whether all application fields are collected"
+        description="Extract name, email, and skills from user input"
     )
 ]
 
-# System Prompt
+# System prompt
 SYSTEM_PROMPT = """
 You are a job application assistant.
-Rules:
-1. ALWAYS extract information using tools.
-2. After extracting, ALWAYS check if the application is complete.
-3. If something is missing, politely ask ONLY for missing fields.
-4. If complete, confirm and stop.
-Do not invent data.
+Extract information using tools.
+Do not ask for information that is already collected.
+Ask only for missing fields.
 """
 
-# Initialize Agent
+# Agent initialization
 agent = initialize_agent(
     tools=tools,
     llm=llm,
@@ -102,62 +107,52 @@ agent = initialize_agent(
     agent_kwargs={"system_message": SYSTEM_PROMPT}
 )
 
+# UI
+st.title("🧠 Goal-Based Job Application Assistant")
+st.markdown("Tell me your **name**, **email**, and **skills**.")
 
-    
-def extract_text_from_pdf(file):
-    doc = fitz.open(stream=file.read(), filetype="pdf")
-    return "".join(page.get_text() for page in doc)
-    
-# Streamlit UI
-st.title("🧠 Goal-Based Job Application Agent")
-st.markdown("I will collect your **name**, **email**, and **skills**.")
-    
-# Resume
-st.sidebar.header("📤 Upload Resume (Optional)")
-resume = st.sidebar.file_uploader("Upload PDF resume", type=["pdf"])
-if resume:
-    resume_text = extract_text_from_pdf(resume)
-    agent.invoke({"input": resume_text})
-    st.sidebar.success("Resume processed by agent")
-
-# User Input 
+# Chat input
 user_input = st.chat_input("Type here...")
 
 if user_input:
     st.session_state.chat_ui.append(("user", user_input))
+
     with st.spinner("🤖 Thinking..."):
-        response = agent.invoke({"input": user_input})
-    st.session_state.chat_ui.append(("bot", response["output"]))
+        agent.invoke({"input": user_input})
+
+    info = st.session_state.application_info
+    missing = [k for k, v in info.items() if not v]
+
+    if not missing:
+        bot_reply = (
+            "🎉 **Application complete!**\n\n"
+            f"- **Name:** {info['name']}\n"
+            f"- **Email:** {info['email']}\n"
+            f"- **Skills:** {info['skills']}"
+        )
+    else:
+        bot_reply = f"⏳ Please tell me your **{missing[0]}**."
 
 
+    st.session_state.chat_ui.append(("bot", bot_reply))
 
-# Display Chat
+# Display chat
 for sender, msg in st.session_state.chat_ui:
     if sender == "user":
         with st.chat_message("user"):
-            st.markdown(f"🧑 {msg}")
+            st.markdown(msg)
     else:
         with st.chat_message("assistant"):
-            st.markdown(f"🤖 {msg}")
+            st.markdown(msg)
 
 
-#Final Output
-final_status = check_application_goal("check")
-if final_status.startswith("✅"):
-    st.success("🎉 Application Completed!")
-
-    info = st.session_state.application_info
-    summary = f"""
-Name: {info['name']}
-Email: {info['email']}
-Skills: {info['skills']}
-"""
-    st.download_button(
-        "📥 Download Application Summary",
-        summary,
-        "application_summary.txt"
-    )
-#Reset
-if st.sidebar.button("🔄 Reset"):
-    st.session_state.clear()
+# Reset without clearing API key
+if st.button("🔄 Reset"):
+    st.session_state.application_info = {
+        "name": None,
+        "email": None,
+        "skills": None
+    }
+    st.session_state.chat_ui = []
+    st.session_state.memory.clear()
     st.rerun()

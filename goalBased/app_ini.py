@@ -81,7 +81,7 @@ agent = initialize_agent(
     llm=llm,
     memory=memory,
     agent=AgentType.CHAT_CONVERSATIONAL_REACT_DESCRIPTION,
-    verbose=True, # Internal process will be shown on screen
+    verbose=False, # Internal process will be shown on screen
     agent_kwargs={"system_message": SYSTEM_PROMPT}
 )
 

@@ -1,9 +1,9 @@
-langchain==0.1.16
-langchain-core == 0.1.53
+langchain==0.2.14
+langchain-core==0.2.33
+langchain-google-genai==1.0.8
 streamlit
 python-dotenv
 PyMuPDF
-langchain-google-genai == 4.1.2
 
 #pip langchain-community
 # langchain-openai

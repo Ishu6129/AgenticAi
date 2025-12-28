@@ -1,0 +1,7 @@
+For using gemini or OpenAI:
+    set api key in ".env"
+
+If using ollama installed :
+    model list
+    ollama pull <Model_Name>
+    ollama serve

@@ -1,134 +1,71 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Goal-Based Job Application Assistant</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <style>
-        body {
-            font-family: Arial, Helvetica, sans-serif;
-            line-height: 1.6;
-            margin: 40px;
-            background-color: #ffffff;
-            color: #222;
-        }
-        h1, h2, h3 {
-            color: #1f2937;
-        }
-        code, pre {
-            background-color: #f4f4f4;
-            padding: 6px;
-            border-radius: 4px;
-            display: block;
-            overflow-x: auto;
-        }
-        ul {
-            margin-left: 20px;
-        }
-        .section {
-            margin-bottom: 40px;
-        }
-    </style>
-</head>
-<body>
+Sure! Here's the entire `README.md` content in one go:
 
-<h1>Goal-Based Job Application Assistant</h1>
+````markdown
+# Goal-Based Job Application Assistant
 
-<p>
-This project demonstrates a <strong>goal-based conversational AI assistant</strong> that collects
-a user's <strong>name, email, and skills</strong> through natural conversation.
-The system is designed with strict state control to avoid repetition, hallucination,
-or infinite questioning.
-</p>
+This project demonstrates a **goal-based conversational AI assistant** that collects a user's **name, email, and skills** through natural conversation. The system is designed with strict state control to avoid repetition, hallucination, or infinite questioning.
 
-<div class="section">
-    <h2>Core Concept</h2>
-    <p>
-        The assistant follows a <strong>goal-based architecture</strong>:
-    </p>
-    <ul>
-        <li>The application controls the goal state.</li>
-        <li>The LLM is used only for understanding and extraction.</li>
-        <li>Once a field is collected, it is treated as immutable.</li>
-        <li>The assistant asks only for missing information.</li>
-    </ul>
-    <p>
-        This mirrors how production AI systems are built and avoids common agent-loop issues.
-    </p>
-</div>
+## Core Concept
 
-<div class="section">
-    <h2>Project Structure</h2>
-    <ul>
-        <li><strong>Streamlit UI Version</strong> – User-facing web application using Gemini API</li>
-        <li><strong>CLI Prototype (Gemini API)</strong> – Initial console-based implementation</li>
-        <li><strong>Local Ollama Version</strong> – Offline implementation using local LLM</li>
-    </ul>
-</div>
+The assistant follows a **goal-based architecture**:
+- The application controls the goal state.
+- The LLM is used only for understanding and extraction.
+- Once a field is collected, it is treated as immutable.
+- The assistant asks only for missing information.
 
-<div class="section">
-    <h2>1. Streamlit UI (Gemini API)</h2>
-    <p>
-        This is the main production-style interface.
-    </p>
-    <ul>
-        <li>Built using Streamlit</li>
-        <li>User enters Gemini API key via secure popup</li>
-        <li>Chat-based interaction</li>
-        <li>Goal-based flow control</li>
-        <li>No repeated questions</li>
-        <li>State preserved across messages</li>
-    </ul>
-    <p>
-        The UI clearly displays both user and assistant messages and shows
-        a structured summary once the application is complete.
-    </p>
-</div>
+This mirrors how production AI systems are built and avoids common agent-loop issues.
 
-<div class="section">
-    <h2>2. CLI Prototype (Gemini API)</h2>
-    <p>
-        This version was created to understand the core logic before adding a UI.
-    </p>
-    <ul>
-        <li>Runs entirely in the terminal</li>
-        <li>Uses LangChain with Gemini API</li>
-        <li>Demonstrates memory and tool usage</li>
-        <li>Stops automatically once the goal is reached</li>
-    </ul>
-    <p>
-        This file serves as a learning and debugging reference.
-    </p>
-</div>
+## Project Structure
 
-<div class="section">
-    <h2>3. Local Ollama Version</h2>
-    <p>
-        This version removes all external API dependencies.
-    </p>
-    <ul>
-        <li>Uses Ollama with a local model (example: phi3)</li>
-        <li>No internet required</li>
-        <li>Same goal-based logic</li>
-        <li>Suitable for privacy-sensitive environments</li>
-    </ul>
-</div>
+- **Streamlit UI Version** – User-facing web application using Gemini API
+- **CLI Prototype (Gemini API)** – Initial console-based implementation
+- **Local Ollama Version** – Offline implementation using a local LLM
 
-<div class="section">
-    <h2>Technologies Used</h2>
-    <ul>
-        <li>Python</li>
-        <li>Streamlit</li>
-        <li>LangChain</li>
-        <li>Google Gemini API</li>
-        <li>Ollama (local LLM)</li>
-        <li>Regular Expressions for controlled extraction</li>
-    </ul>
-</div>
+## 1. Streamlit UI (Gemini API)
 
-<div class="section">
-    <h2>Dependencies</h2>
-    <pre>
+This is the main production-style interface.
+
+- Built using Streamlit
+- User enters Gemini API key via secure popup
+- Chat-based interaction
+- Goal-based flow control
+- No repeated questions
+- State preserved across messages
+
+The UI clearly displays both user and assistant messages and shows a structured summary once the application is complete.
+
+## 2. CLI Prototype (Gemini API)
+
+This version was created to understand the core logic before adding a UI.
+
+- Runs entirely in the terminal
+- Uses LangChain with Gemini API
+- Demonstrates memory and tool usage
+- Stops automatically once the goal is reached
+
+This file serves as a learning and debugging reference.
+
+## 3. Local Ollama Version
+
+This version removes all external API dependencies.
+
+- Uses Ollama with a local model (e.g., phi3)
+- No internet required
+- Same goal-based logic
+- Suitable for privacy-sensitive environments
+
+## Technologies Used
+
+- Python
+- Streamlit
+- LangChain
+- Google Gemini API
+- Ollama (local LLM)
+- Regular Expressions for controlled extraction
+
+## Dependencies
+
+```bash
 langchain==0.2.14
 langchain-core==0.2.33
 langchain-google-genai==1.0.8
@@ -136,56 +73,48 @@ langchain-community
 streamlit
 python-dotenv
 PyMuPDF
-    </pre>
-</div>
+````
 
-<div class="section">
-    <h2>How to Run</h2>
+## How to Run
 
-    <h3>Streamlit UI</h3>
-    <pre>
+### Streamlit UI
+
+```bash
 streamlit run app.py
-    </pre>
+```
 
-    <h3>CLI Gemini Prototype</h3>
-    <pre>
+### CLI Gemini Prototype
+
+```bash
 python gemini_cli.py
-    </pre>
+```
 
-    <h3>Local Ollama Version</h3>
-    <pre>
+### Local Ollama Version
+
+```bash
 ollama run phi3
 python ollama_cli.py
-    </pre>
-</div>
+```
 
-<div class="section">
-    <h2>Key Design Takeaways</h2>
-    <ul>
-        <li>LLMs should not control application state</li>
-        <li>Goals must be evaluated outside the agent</li>
-        <li>Once extracted, data should not be revalidated</li>
-        <li>Regex boundaries must handle real-world punctuation</li>
-    </ul>
-</div>
+## Key Design Takeaways
 
-<div class="section">
-    <h2>Use Cases</h2>
-    <ul>
-        <li>Job application intake bots</li>
-        <li>HR screening assistants</li>
-        <li>Form-free data collection</li>
-        <li>Conversational onboarding systems</li>
-    </ul>
-</div>
+* LLMs should not control application state
+* Goals must be evaluated outside the agent
+* Once extracted, data should not be revalidated
+* Regex boundaries must handle real-world punctuation
 
-<div class="section">
-    <h2>Author</h2>
-    <p>
-        Developed as a practical exploration of goal-based AI agents
-        using modern LLM tooling.
-    </p>
-</div>
+## Use Cases
 
-</body>
-</html>
+* Job application intake bots
+* HR screening assistants
+* Form-free data collection
+* Conversational onboarding systems
+
+## Author
+
+Developed as a practical exploration of goal-based AI agents using modern LLM tooling.
+
+```
+
+This is a complete `README.md` formatted in one block. Let me know if you need any further adjustments!
+```

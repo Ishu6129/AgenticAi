@@ -109,3 +109,6 @@ All code and concepts were reviewed, validated, and fully understood by the auth
 
 ---
 
+## 📜 License
+
+This project is licensed under the **MIT License**.

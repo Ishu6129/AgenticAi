@@ -2,29 +2,33 @@ import random
 import numpy as np
 import pygame
 
-#BASIC SETUP
+# BASIC SETUP
 pygame.init()
 width = 300
 height = 300
 gridSize = 5
 cellSize = width // gridSize
-fps = 200
+fps = 69
 
-#COLORS
+# NAMES (GUI LABELS)
+SNAKE_NAME = "Snake"
+FOOD_NAME = "Food"
+
+# COLORS
 white = (255, 255, 255)
 green = (0, 255, 0)
 red   = (255, 0, 0)
 black = (0, 0, 0)
 
-#ACTIONS
+# ACTIONS
 ACTIONS = [(0,-1), (0,1), (-1,0), (1,0)]
 
-#WINDOW
+# WINDOW
 win = pygame.display.set_mode((width, height))
 pygame.display.set_caption("Snake Q-Learning (Optimized)")
-font = pygame.font.SysFont(None, 20)
+label_font = pygame.font.SysFont("arial", 14, bold=True)
 
-#FOOD
+# FOOD
 class Food:
     def randomize(self, snake):
         while True:
@@ -36,7 +40,7 @@ class Food:
                 self.position = pos
                 break
 
-#SNAKE
+# SNAKE
 class Snake:
     def __init__(self):
         self.positions = [(2, 2)]
@@ -65,10 +69,10 @@ class Snake:
             hy < 0 or hy >= gridSize
         )
 
-#Q-TABLE
+# Q-TABLE
 q_table = {}
 
-#HYPERPARAMETERS
+# HYPERPARAMETERS
 alpha = 0.15
 gamma = 0.95
 
@@ -80,7 +84,7 @@ num_episodes = 5000
 MAX_STEPS = 200
 overall_hits = 0
 
-#STATE
+# STATE
 def get_state(snake, food):
     hx, hy = snake.positions[0]
     fx, fy = food.position
@@ -95,7 +99,7 @@ def get_state(snake, food):
     food_dir = (np.sign(fx - hx), np.sign(fy - hy))
     return danger + food_dir
 
-#REWARD
+# REWARD
 def get_reward(snake, food, prev_dist):
     hx, hy = snake.positions[0]
     fx, fy = food.position
@@ -109,7 +113,7 @@ def get_reward(snake, food, prev_dist):
 
     return (2 if curr_dist < prev_dist else -2), curr_dist
 
-#TRAINING
+# TRAINING
 clock = pygame.time.Clock()
 
 for episode in range(1, num_episodes + 1):
@@ -121,7 +125,6 @@ for episode in range(1, num_episodes + 1):
                 abs(snake.positions[0][1] - food.position[1])
 
     done = False
-    total_reward = 0
     steps = 0
 
     while not done and steps < MAX_STEPS:
@@ -144,7 +147,6 @@ for episode in range(1, num_episodes + 1):
         snake.move(ACTIONS[action_idx])
 
         reward, prev_dist = get_reward(snake, food, prev_dist)
-        total_reward += reward
 
         next_state = get_state(snake, food)
         q_table.setdefault(next_state, np.zeros(4))
@@ -161,19 +163,37 @@ for episode in range(1, num_episodes + 1):
         if snake.collision():
             done = True
 
-        #DRAW
+        # DRAW
         win.fill(white)
+
         for i in range(gridSize):
             for j in range(gridSize):
-                pygame.draw.rect(win, black,
-                    (i*cellSize, j*cellSize, cellSize, cellSize), 1)
+                pygame.draw.rect(
+                    win, black,
+                    (i * cellSize, j * cellSize, cellSize, cellSize), 1
+                )
 
-        for pos in snake.positions:
-            pygame.draw.rect(win, green,
-                (pos[0]*cellSize, pos[1]*cellSize, cellSize, cellSize))
+        for idx, pos in enumerate(snake.positions):
+            rect = pygame.Rect(
+                pos[0] * cellSize, pos[1] * cellSize, cellSize, cellSize
+            )
+            pygame.draw.rect(win, green, rect)
 
-        pygame.draw.rect(win, red,
-            (food.position[0]*cellSize, food.position[1]*cellSize, cellSize, cellSize))
+            if idx == 0:
+                text = label_font.render(SNAKE_NAME, True, black)
+                text_rect = text.get_rect(center=rect.center)
+                win.blit(text, text_rect)
+
+        food_rect = pygame.Rect(
+            food.position[0] * cellSize,
+            food.position[1] * cellSize,
+            cellSize,
+            cellSize
+        )
+        pygame.draw.rect(win, red, food_rect)
+        food_text = label_font.render(FOOD_NAME, True, black)
+        food_text_rect = food_text.get_rect(center=food_rect.center)
+        win.blit(food_text, food_text_rect)
 
         pygame.display.update()
 
@@ -183,7 +203,7 @@ for episode in range(1, num_episodes + 1):
     if episode % 100 == 0:
         print(f"Episode {episode} | Avg Hits: {overall_hits/episode:.2f} | Epsilon: {epsilon:.3f}")
 
-#SUMMARY
+# SUMMARY
 print("\n===== TRAINING SUMMARY =====")
 print(f"Episodes           : {num_episodes}")
 print(f"Total Food Eaten   : {overall_hits}")

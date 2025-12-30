@@ -1,4 +1,4 @@
-````md
+
 # 🐍 Snake Game using Q-Learning (Reinforcement Learning)
 
 <p align="center">
